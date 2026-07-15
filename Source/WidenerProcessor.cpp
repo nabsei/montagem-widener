@@ -19,6 +19,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout WidenerProcessor::createPara
     return { params.begin(), params.end() };
 }
 
+bool WidenerProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
+    // The mid/side math assumes exactly 2 channels; restrict the negotiated
+    // layout to stereo instead of relying only on the runtime guard in
+    // processBlock().
+    return layouts.getMainInputChannelSet() == juce::AudioChannelSet::stereo()
+        && layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
+}
+
 void WidenerProcessor::prepareToPlay(double sampleRate, int)
 {
     lastSampleRate = sampleRate;

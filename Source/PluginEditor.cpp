@@ -46,7 +46,8 @@ WidenerEditor::WidenerEditor(WidenerProcessor& p)
     brandLabel.setFont(juce::Font(juce::FontOptions(10.0f, juce::Font::plain)));
     addAndMakeVisible(brandLabel);
 
-    setResizable(false, false);
+    setResizable(true, true);
+    setResizeLimits(360, 280, 900, 700);
     setSize(480, 360);
 }
 
@@ -82,12 +83,17 @@ void WidenerEditor::paint(juce::Graphics& g)
     const float centreY = knobArea.getCentreY();
     const float barThickness = 4.0f;
     const float barGap = 16.0f; // clearance from the knob's outer edge
-    // Window is 480px wide, knob right edge sits at x=330 (centred, 180px knob).
-    // Budget to the window edge: barGap(16) + barLength + dotRadius(5) +
-    // half the L/R label width(14) must stay under 480-330=150, with margin.
-    // 130 was too long (label clipped off the right edge at amount=1.0) --
-    // measured, not assumed, after the first version shipped that bug.
-    const float barLength = juce::jmap(amount, 0.0f, 1.0f, 10.0f, 100.0f);
+    // Computed from the actual window/knob size rather than a hardcoded
+    // budget for one fixed window size -- the window is resizable and the
+    // knob scales with it (see resized()), so a fixed max length here would
+    // reintroduce the exact "label clipped off the edge" bug this decoration
+    // was rewritten to avoid once already.
+    const float budgetDotRadius = 5.0f; // matches drawWingBar's own dotRadius below
+    const float halfLabelWidth = 14.0f;
+    const float decorBudget = barGap + budgetDotRadius + halfLabelWidth + 6.0f; // + small margin
+    const float availableToEdge = bounds.getWidth() * 0.5f - knobArea.getWidth() * 0.5f;
+    const float maxBarLength = juce::jmax(10.0f, availableToEdge - decorBudget);
+    const float barLength = juce::jmap(amount, 0.0f, 1.0f, 10.0f, maxBarLength);
 
     auto drawWingBar = [&](bool onRight)
     {
@@ -125,7 +131,7 @@ void WidenerEditor::resized()
     footerLabel.setBounds(area.removeFromBottom(18));
     amountValueLabel.setBounds(area.removeFromBottom(28));
 
-    const int knobSize = 180;
+    const int knobSize = juce::jlimit(120, 260, juce::jmin(area.getWidth(), area.getHeight()) - 40);
     juce::Rectangle<int> knobArea(0, 0, knobSize, knobSize);
     knobArea.setCentre(area.getCentre());
     amountSlider.setBounds(knobArea);
