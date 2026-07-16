@@ -40,7 +40,7 @@ WidenerEditor::WidenerEditor(WidenerProcessor& p)
     amountSlider.onValueChange = [this] { updateValueLabel(); repaint(); };
     updateValueLabel();
 
-    brandLabel.setText("@montagem.widener", juce::dontSendNotification);
+    brandLabel.setText("Bumpin Audio", juce::dontSendNotification);
     brandLabel.setJustificationType(juce::Justification::centredRight);
     brandLabel.setColour(juce::Label::textColourId, WidenerLookAndFeel::textDim.withAlpha(0.5f));
     brandLabel.setFont(juce::Font(juce::FontOptions(10.0f, juce::Font::plain)));
@@ -77,7 +77,7 @@ void WidenerEditor::paint(juce::Graphics& g)
     // grow into the title/subtitle text above, at any amount value -- no
     // curve math, no clamping, nothing that can look uneven at the extremes.
     const float amount = (float)amountSlider.getValue();
-    const auto colour = WidenerLookAndFeel::red.interpolatedWith(WidenerLookAndFeel::green, amount);
+    const auto colour = WidenerLookAndFeel::cyan.interpolatedWith(WidenerLookAndFeel::magenta, amount);
 
     auto knobArea = amountSlider.getBounds().toFloat();
     const float centreY = knobArea.getCentreY();
